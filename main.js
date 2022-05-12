@@ -1,4 +1,6 @@
 
+https://teachablemachine.withgoogle.com/models/LfG3c3iDW/
+
  model = await tmImage.load(modelURL, metadataURL);
  maxPredictions = model.getTotalClasses();
 
