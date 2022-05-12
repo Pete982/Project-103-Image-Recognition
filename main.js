@@ -1,33 +1,44 @@
 
-https://teachablemachine.withgoogle.com/models/LfG3c3iDW/
 
- model = await tmImage.load(modelURL, metadataURL);
- maxPredictions = model.getTotalClasses();
 
-const flip = true; // whether to flip the webcam
-webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-await webcam.setup(); // request access to the webcam
-await webcam.play();
-window.requestAnimationFrame(loop);
+Webcam.set({
+    width: 350, 
+    height: 300,
+    image_format: 'png',
+    png_quality: 90
+});
 
-document.getElementById("webcam-container").appendChild(webcam.canvas);
-labelContainer = document.getElementById("label-container");
-for (let i = 0; i < maxPredictions; i++) { // and class labels
-    labelContainer.appendChild(document.createElement("div"));
+camera=document.getElementById("camera");
+
+Webcam.attach('#camera');
+
+function take_snapshot(){
+    Webcam.snap(function(data_uri){
+        document.getElementById("result").innerHTML='<img id="capture_image" src="'+data_uri+'">';
+    });
 }
 
-async function loop() {
-    webcam.update(); // update the webcam frame
-    await predict();
-    window.requestAnimationFrame(loop);
+console.log('Ml5 Version', ml5.version);
+
+classifier=ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/YEmfuus8I/model.json', modelloaded);
+
+function modelloaded(){
+    console.log('Model is Loaded')
 }
 
-async function predict() {
-    // predict can take in an image, video or canvas html element
-    const prediction = await model.predict(webcam.canvas);
-    for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
+function check(){
+    img=document.getElementById('capture_image');
+    classifier.classify(img, gotResult);
+}
+
+function gotResult(error, results){
+    if(error){
+        console.error(error);
+    }
+
+    else{
+        console.log(results);
+        document.getElementById("result_object_name").innerHTML=results[0].label;
+        document.getElementById("result_object_accuracy").innerHTML=results[0].confidence.toFixed(3);
     }
 }
